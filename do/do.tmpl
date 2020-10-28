@@ -1,0 +1,55 @@
+{
+    "schemaVersion": "1.0.0",
+    "class": "Device",
+    "async": true,  
+    "label": "my BIG-IP declaration for declarative onboarding",
+    "Common": {
+        "class": "Tenant",
+        "hostname": ${hostname},
+        "myProvisioning": {
+            "class": "Provision",
+            "ltm": "nominal"
+        },
+        "myDns": {
+            "class": "DNS",
+            "nameServers": [
+            ${dns}
+            ],
+            "search": [
+                "f5.com",
+                "test.com"
+            ]
+        },
+        "myNtp": {
+            "class": "NTP",
+            "servers": [
+                ${ntp}
+            ],
+            "timezone": "UTC"
+        },
+        "external": {
+            "class": "VLAN",
+            "tag": 1001,
+            "mtu": 1500,
+            "interfaces": [
+                {
+                    "name": "1.1",
+                    "tagged": false
+                }
+            ]
+        },
+        "external-self": {
+            "class": "SelfIp",
+            "address": ${external_ip},
+            "vlan": "external",
+            "allowService": "none",
+            "trafficGroup": "traffic-group-local-only"
+        },
+        "default": {
+            "class": "Route",
+            "gw": ${external_gw},
+            "network": "default",
+            "mtu": 1500 
+        }       
+    }
+}
