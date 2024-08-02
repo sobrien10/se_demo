@@ -15,7 +15,7 @@ variable "ssh_key_name" {
 
 variable "f5_ami_search_name" {
   description = "search term to find the appropriate F5 AMI for current region"
-  default = "F5*BIGIP-15.1.0.4*Better*25Mbps*"
+  default = "F5*BIGIP-15.1.10.4-0.0.5*PAYG-Best*Plus*25Mbps*"
   }
 
 variable "libs_dir" {

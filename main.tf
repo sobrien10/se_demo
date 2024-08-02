@@ -1,21 +1,23 @@
 #Configure the AWS provider
 provider "aws" {
-  version = "~> 2.0"  
+  #version = "~> 2.0"  
   region  = "eu-west-2"
 }
 
 #Configure the VPC and Public Subnets
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "~> v2.0"
+  #version = "~> v2.0"
 
   name = "${var.prefix}-f5-vpc"
   cidr = "10.0.0.0/16"
 
   azs             = ["eu-west-2a"]
   public_subnets  = ["10.0.1.0/24", "10.0.2.0/24"]
+  private_subnets = ["10.0.3.0/24"]
 
   enable_nat_gateway = true
+  #create_database_subnet_route_table = true
 
   tags = {
     Environment = "ob1-vpc-teraform"
@@ -31,35 +33,35 @@ resource "aws_security_group" "f5" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["90.208.9.18/32"]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
     ingress {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["90.208.9.18/32"]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
     ingress {
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = ["90.208.9.18/32"]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
     from_port   = 8080
     to_port     = 8080
     protocol    = "tcp"
-    cidr_blocks = ["90.208.9.18/32"]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
     from_port   = 8443
     to_port     = 8443
     protocol    = "tcp"
-    cidr_blocks = ["90.208.9.18/32"]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
@@ -85,7 +87,7 @@ resource "aws_network_interface" "mgmt" {
 }
 
 resource "aws_eip" "mgmt" {
-  vpc                       = true
+  domain                    = "vpc"
   network_interface         = aws_network_interface.mgmt.id
   associate_with_private_ip = "10.0.1.10"
 }
@@ -101,17 +103,17 @@ resource "aws_network_interface" "public" {
   }
 }
 
-resource "aws_eip" "public1" {
-  vpc                       = true
+resource "aws_eip" "public" {
+  domain                    = "vpc"
   network_interface         = aws_network_interface.public.id
   associate_with_private_ip = "10.0.2.10"
 }
 
-resource "aws_eip" "public2" {
-  vpc                       = true
-  network_interface         = aws_network_interface.public.id
-  associate_with_private_ip = "10.0.2.11"
-}
+#resource "aws_eip" "public2" {
+  #vpc                       = true
+  #network_interface         = aws_network_interface.public.id
+  #associate_with_private_ip = "10.0.2.11"
+#}
 
 #Find the ami variable
 data "aws_ami" "f5_ami" {
@@ -186,7 +188,7 @@ output "f5_user" {
 }
 
 output "f5_pub_ip" {
-  value = aws_eip.public1.private_ip
+  value = aws_eip.public.private_ip
 }
 
 data "aws_subnet" "f5_pub_data" {
